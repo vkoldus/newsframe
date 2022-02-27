@@ -11,6 +11,7 @@ const parser = new XMLParser();
 
 const COUNTRY_CODES_TO_SHOW_IN = ["RU"];
 const NEWS_URL = "http://feeds.bbci.co.uk/russian/rss.xml";
+const HEADLINE = "BBC";
 const REQUEST_CACHE_MAX_AGE = 5 * 60 * 1000;
 const RESPONSE_CACHE_CONFIG = {
     max: 100,
@@ -89,7 +90,9 @@ Reader.open("data/GeoLite2-Country.mmdb").then((reader) => {
                     content.push(formatNewsItem(newsItem));
                 }
 
-                response = `<html><body>${content.join("\n")}</body></html>`;
+                response = `<html><body><h1>${HEADLINE}</h1>${content.join(
+                    "\n"
+                )}</body></html>`;
                 responseCache.set(NEWS_CACHE_KEY, response);
                 res.send(response);
                 return;
