@@ -2,18 +2,30 @@ const express = require("express");
 const axios = require("axios").default;
 const Reader = require("@maxmind/geoip2-node").Reader;
 const { XMLParser } = require("fast-xml-parser");
+const { setup } = require("axios-cache-adapter");
+const { URL } = require("url");
 
 const app = express();
 const parser = new XMLParser();
 
 const COUNTRY_CODES_TO_SHOW_IN = ["RU"];
 const NEWS_URL = "http://feeds.bbci.co.uk/russian/rss.xml";
+const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
+
+const url = new URL(NEWS_URL);
+const api = setup({
+    baseUrl: url.origin,
+    maxAge: CACHE_MAX_AGE_MS,
+    readHeaders: true,
+});
 
 async function getNews() {
     let rssResponse;
 
+    const length = await api.cache.length();
+
     try {
-        rssResponse = await axios.get(NEWS_URL);
+        rssResponse = await api.get(NEWS_URL);
     } catch (e) {
         console.error("Could not retrieve news.", e);
         return null;
