@@ -6,9 +6,7 @@ const { setup } = require("axios-cache-adapter");
 const { URL } = require("url");
 const LRU = require("lru-cache");
 
-const app = express();
-const parser = new XMLParser();
-
+const SERVER_PORT = 5000;
 const COUNTRY_CODES_TO_SHOW_IN = ["RU"];
 const NEWS_URL = "http://feeds.bbci.co.uk/russian/rss.xml";
 const HEADLINE = "BBC";
@@ -19,16 +17,18 @@ const RESPONSE_CACHE_CONFIG = {
     ttlResolution: 100,
 };
 
+const app = express();
+const parser = new XMLParser();
 const url = new URL(NEWS_URL);
 const api = setup({
     baseUrl: url.origin,
     maxAge: REQUEST_CACHE_MAX_AGE,
     readHeaders: true,
 });
-
 const responseCache = new LRU(RESPONSE_CACHE_CONFIG);
 
 const NEWS_CACHE_KEY = "news";
+
 async function getNews() {
     let rssResponse;
 
@@ -44,7 +44,7 @@ async function getNews() {
         return null;
     }
 
-    let news = parser.parse(rssResponse.data);
+    const news = parser.parse(rssResponse.data);
     if (!news) {
         console.error("Could not parse news content.");
         return null;
@@ -59,7 +59,7 @@ function formatNewsItem(newsItem) {
 
 Reader.open("data/GeoLite2-Country.mmdb").then((reader) => {
     app.get("/", async (req, res) => {
-        ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+        let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
         if (ip.startsWith("::ffff:")) {
             ip = ip.substring(7);
         }
@@ -67,7 +67,7 @@ Reader.open("data/GeoLite2-Country.mmdb").then((reader) => {
         // For testing, pick a country and comment out the return below.
         let country = "RU";
         try {
-            let searchResult = reader.country(ip);
+            const searchResult = reader.country(ip);
             country = searchResult.country.isoCode;
         } catch (e) {
             console.log("Could not find address", ip, e);
@@ -102,7 +102,7 @@ Reader.open("data/GeoLite2-Country.mmdb").then((reader) => {
         res.send("");
     });
 
-    var server = app.listen(5000, function () {
-        console.log("Node server is running...");
+    var server = app.listen(SERVER_PORT, function () {
+        console.log(`Server listening on port ${SERVER_PORT}...`);
     });
 });
