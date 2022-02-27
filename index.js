@@ -65,10 +65,10 @@ Reader.open("data/GeoLite2-Country.mmdb").then((reader) => {
         }
 
         // For testing, pick a country and comment out the return below.
-        const country = "RU";
+        let country = "RU";
         try {
             let searchResult = reader.country(ip);
-            const country = searchResult.country.isoCode;
+            country = searchResult.country.isoCode;
         } catch (e) {
             console.log("Could not find address", ip, e);
             res.send("");
