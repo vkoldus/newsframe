@@ -4,25 +4,32 @@ const Reader = require("@maxmind/geoip2-node").Reader;
 const { XMLParser } = require("fast-xml-parser");
 const { setup } = require("axios-cache-adapter");
 const { URL } = require("url");
+const LRU = require("lru-cache");
 
 const app = express();
 const parser = new XMLParser();
 
 const COUNTRY_CODES_TO_SHOW_IN = ["RU"];
 const NEWS_URL = "http://feeds.bbci.co.uk/russian/rss.xml";
-const CACHE_MAX_AGE_MS = 5 * 60 * 1000;
+const REQUEST_CACHE_MAX_AGE = 5 * 60 * 1000;
+const RESPONSE_CACHE_CONFIG = {
+    max: 100,
+    ttl: 1000 * 30,
+    ttlResolution: 100,
+};
 
 const url = new URL(NEWS_URL);
 const api = setup({
     baseUrl: url.origin,
-    maxAge: CACHE_MAX_AGE_MS,
+    maxAge: REQUEST_CACHE_MAX_AGE,
     readHeaders: true,
 });
 
+const responseCache = new LRU(RESPONSE_CACHE_CONFIG);
+
+const NEWS_CACHE_KEY = "news";
 async function getNews() {
     let rssResponse;
-
-    const length = await api.cache.length();
 
     try {
         rssResponse = await api.get(NEWS_URL);
@@ -68,17 +75,25 @@ Reader.open("data/GeoLite2-Country.mmdb").then((reader) => {
         }
 
         if (COUNTRY_CODES_TO_SHOW_IN.includes(country)) {
-            const news = await getNews();
-
-            if (news) {
-            let content = [];
-            for (let newsItem of news) {
-                content.push(formatNewsItem(newsItem));
+            let response = responseCache.get(NEWS_CACHE_KEY);
+            if (response) {
+                res.send(response);
+                return;
             }
 
-            res.send(`<html><body>${content.join("\n")}</body></html>`);
-            return;
-        }
+            news = await getNews();
+
+            if (news) {
+                let content = [];
+                for (let newsItem of news) {
+                    content.push(formatNewsItem(newsItem));
+                }
+
+                response = `<html><body>${content.join("\n")}</body></html>`;
+                responseCache.set(NEWS_CACHE_KEY, response);
+                res.send(response);
+                return;
+            }
         }
 
         res.send("");
