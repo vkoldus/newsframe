@@ -53,11 +53,39 @@ async function getNews() {
     return news.rss.channel.item;
 }
 
-function formatNewsItem(newsItem) {
-    return `<h2><a href='${newsItem.link}'>${newsItem.title}<a></h2><p>${newsItem.description}</p>`;
+function formatResponse(newsList) {
+    const formattedItems = newsList.map(
+        (item) =>
+            `<h2><a href='${item.link}'>${item.title}<a></h2><p>${item.description}</p>`
+    );
+
+    return `<html><body><h1>${HEADLINE}</h1>${formattedItems.join(
+        "\n"
+    )}</body></html>`;
 }
 
-Reader.open("data/GeoLite2-Country.mmdb").then((reader) => {
+async function getAndFormatNews() {
+    const news = await getNews();
+
+    if (news) {
+        return formatResponse(news);
+    } else {
+        return null;
+    }
+}
+
+async function seedCache() {
+    console.log("Making first news request, seeding cache.");
+    const cacheSeed = await getAndFormatNews();
+    if (cacheSeed) {
+        responseCache.set(NEWS_CACHE_KEY, cacheSeed);
+    }
+}
+
+async function main() {
+    const reader = await Reader.open("data/GeoLite2-Country.mmdb");
+    await seedCache();
+
     app.get("/", async (req, res) => {
         let ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
         if (ip.startsWith("::ffff:")) {
@@ -82,17 +110,9 @@ Reader.open("data/GeoLite2-Country.mmdb").then((reader) => {
                 return;
             }
 
-            news = await getNews();
-
-            if (news) {
-                let content = [];
-                for (let newsItem of news) {
-                    content.push(formatNewsItem(newsItem));
-                }
-
-                response = `<html><body><h1>${HEADLINE}</h1>${content.join(
-                    "\n"
-                )}</body></html>`;
+            console.log("no cache");
+            response = await getAndFormatNews();
+            if (response) {
                 responseCache.set(NEWS_CACHE_KEY, response);
                 res.send(response);
                 return;
@@ -102,7 +122,11 @@ Reader.open("data/GeoLite2-Country.mmdb").then((reader) => {
         res.send("");
     });
 
-    var server = app.listen(SERVER_PORT, function () {
+    const server = app.listen(SERVER_PORT, function () {
         console.log(`Server listening on port ${SERVER_PORT}...`);
     });
+}
+
+main().catch((e) => {
+    console.error("Server terminated with error", e);
 });
