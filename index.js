@@ -70,6 +70,7 @@ Reader.open("data/GeoLite2-Country.mmdb").then((reader) => {
         if (COUNTRY_CODES_TO_SHOW_IN.includes(country)) {
             const news = await getNews();
 
+            if (news) {
             let content = [];
             for (let newsItem of news) {
                 content.push(formatNewsItem(newsItem));
@@ -77,6 +78,7 @@ Reader.open("data/GeoLite2-Country.mmdb").then((reader) => {
 
             res.send(`<html><body>${content.join("\n")}</body></html>`);
             return;
+        }
         }
 
         res.send("");
