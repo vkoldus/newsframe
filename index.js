@@ -187,17 +187,14 @@ async function main() {
 
     app.get("/script", async (req, res) => {
         if (shouldShowInThisCountry(req, reader)) {
-            let id = req.query.id;
+            let id = JSON.stringify(req.query.id);
+            let width = JSON.stringify(req.query.width || "100%");
+            let height = JSON.stringify(req.query.height || "150px");
             if (id != null) {
                 sendResponseJs(
                     res,
-                    'let divId = "' +
-                        req.query.id +
-                        '";' +
-                        'let newsUrl = "' +
-                        PUBLIC_HOST +
-                        '/json";' +
-                        hostedScript
+                    `let divId=${id}; let newsUrl="${PUBLIC_HOST}/json"; 
+                     let width=${width}; let height=${height};` + hostedScript
                 );
                 return;
             }

@@ -8,8 +8,6 @@ fetch(newsUrl)
     .then((resp) => resp.json())
     .then((data) => {
         let div = document.getElementById(divId);
-        div.style.overflowY = "scroll";
-        div.style.overflowX = "hidden";
         if (div) {
             addNode(div, "h1", "BBC");
             for (let article of data) {
@@ -20,6 +18,10 @@ fetch(newsUrl)
                 );
                 addNode(div, "p", article.description);
             }
+            div.style.overflowY = "scroll";
+            div.style.overflowX = "hidden";
+            div.style.width = width;
+            div.style.height = height;
         }
     })
     .catch((e) => {
