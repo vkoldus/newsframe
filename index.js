@@ -11,7 +11,7 @@ const readFile = (fileName) => util.promisify(fs.readFile)(fileName, "utf8");
 
 const SERVER_PORT = 5000;
 const PUBLIC_HOST = "http://127.0.0.1:5000";
-const COUNTRY_CODES_TO_SHOW_IN = ["RU"];
+const COUNTRY_CODES_TO_SHOW_IN = ["RU", "BY"];
 const NEWS_URL = "http://feeds.bbci.co.uk/russian/rss.xml";
 const HEADLINE = "BBC";
 const REQUEST_CACHE_MAX_AGE = 5 * 60 * 1000;
