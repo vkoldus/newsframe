@@ -12,7 +12,7 @@ There are generally three ways to integrate.
 <iframe name="news" src="SERVER/" loading="lazy"></iframe>
 ```
 
-2. The **/script** endpoint provides a hosted javascript that can be loaded and pointed towards a pre-existing div. The endpoint accepts id, width and height query parameters which are used to find the div and overwrite its styling once the content is loaded.
+2. The **/script** endpoint provides a hosted javascript that can be loaded and pointed towards a pre-existing div.
 
 ```
 <script async src="/script?id=newsframe&height=100px"></script>
@@ -20,6 +20,14 @@ There are generally three ways to integrate.
 <div id="newsframe" style="display:block; width:0px; height: 0px;" >
 </div>
 ```
+
+The endpoint accepts following query parameters which are used to find the div and overwrite its styling once the content is loaded:
+
+-   **id** - Id of the div which will be filled with content.
+-   **width** - Set the div's style width to this value if there is any content. Default is 100%.
+-   **height** - set the div's style height to this value if there is any content. Default is 150px;
+-   **className** - set the div's class name that can be then use for further styling. Default is 'com.x.newsFrame'.
+-   **headline** - set the text inside the leading headline of the content. Default is 'News'.
 
 3. The **/json** endpoint simply provides the channel data as json, if the client comes from the desired location. The callers can then process the data as they desire. This is a basis for integration 2.
 

@@ -147,7 +147,10 @@ function shouldShowInThisCountry(req, reader) {
 async function main() {
     const reader = await Reader.open("data/GeoLite2-Country.mmdb");
     await seedCache();
-    hostedScript = await readFile("src/integration.js");
+    hostedScript = minify(
+        `let newsUrl="${PUBLIC_HOST}/json";` +
+            (await readFile("src/integration.js"))
+    ).code;
 
     app.get("/", async (req, res) => {
         if (shouldShowInThisCountry(req, reader)) {
@@ -189,15 +192,18 @@ async function main() {
 
     app.get("/script", async (req, res) => {
         if (shouldShowInThisCountry(req, reader)) {
-            let id = JSON.stringify(req.query.id);
-            let width = JSON.stringify(req.query.width || "100%");
-            let height = JSON.stringify(req.query.height || "150px");
-            if (id != null) {
-                sendResponseJs(
-                    res,
-                    `let divId=${id}; let newsUrl="${PUBLIC_HOST}/json"; 
-                     let width=${width}; let height=${height};` + hostedScript
-                );
+            let config = {
+                id: req.query.id,
+                className: req.query.className || "com.x.newsFrame",
+                width: req.query.width || "100%",
+                height: req.query.height || "150px",
+                headline:
+                    req.query.headline != null ? req.query.headline : "News",
+            };
+
+            if (config.id != null) {
+                let configCode = "let config=" + JSON.stringify(config) + ";";
+                sendResponseJs(res, configCode + hostedScript);
                 return;
             }
         }

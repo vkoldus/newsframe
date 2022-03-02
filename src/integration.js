@@ -7,9 +7,11 @@ function addNode(parent, tag, inner) {
 fetch(newsUrl)
     .then((resp) => resp.json())
     .then((data) => {
-        let div = document.getElementById(divId);
+        let div = document.getElementById(config.id);
         if (div) {
-            addNode(div, "h1", "BBC");
+            if (config.headline != null) {
+                addNode(div, "h1", config.headline);
+            }
             for (let article of data) {
                 addNode(
                     div,
@@ -20,8 +22,9 @@ fetch(newsUrl)
             }
             div.style.overflowY = "scroll";
             div.style.overflowX = "hidden";
-            div.style.width = width;
-            div.style.height = height;
+            div.style.width = config.width;
+            div.style.height = config.height;
+            div.className = config.className;
         }
     })
     .catch((e) => {
