@@ -194,19 +194,17 @@ async function main() {
         if (shouldShowInThisCountry(req, reader)) {
             let config = {
                 id: req.query.id,
-                className: req.query.className || "com.x.newsFrame",
+                className: req.query.className || "com-x-newsFrame",
                 width: req.query.width || "100%",
                 height: req.query.height || "150px",
                 headline:
                     req.query.headline != null ? req.query.headline : "News",
             };
 
-            if (config.id != null) {
                 let configCode = "let config=" + JSON.stringify(config) + ";";
                 sendResponseJs(res, configCode + hostedScript);
                 return;
             }
-        }
 
         sendResponseJs(res, "");
     });
