@@ -1,13 +1,15 @@
-const express = require("express");
-const axios = require("axios").default;
-const Reader = require("@maxmind/geoip2-node").Reader;
-const { XMLParser } = require("fast-xml-parser");
-const { setup } = require("axios-cache-adapter");
-const { URL } = require("url");
-const LRU = require("lru-cache");
 const fs = require("fs");
 const util = require("util");
 const readFile = (fileName) => util.promisify(fs.readFile)(fileName, "utf8");
+
+const axios = require("axios").default;
+const express = require("express");
+const LRU = require("lru-cache");
+const Reader = require("@maxmind/geoip2-node").Reader;
+const { setup } = require("axios-cache-adapter");
+const { minify } = require("uglify-js");
+const { URL } = require("url");
+const { XMLParser } = require("fast-xml-parser");
 
 const SERVER_PORT = 5000;
 const PUBLIC_HOST = "http://127.0.0.1:5000";
