@@ -195,8 +195,8 @@ async function main() {
             let config = {
                 id: req.query.id,
                 className: req.query.className || "com-x-newsFrame",
-                width: req.query.width || "100%",
-                height: req.query.height || "150px",
+                width: req.query.width,
+                height: req.query.height,
                 headline:
                     req.query.headline != null ? req.query.headline : "News",
             };

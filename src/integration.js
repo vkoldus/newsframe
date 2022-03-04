@@ -5,25 +5,67 @@ function addNode(parent, tag, inner) {
     return e;
 }
 
-function buildContent(div, data, headline = true) {
+function buildContent(div, data, headline = true, forceSize = true) {
     if (div) {
+        addStyles();
+
         if (config.headline != null && headline) {
-            addNode(div, "h1", config.headline);
+            let h = addNode(div, "div", config.headline);
+            h.className = "com-x-newsFrame-headline";
         }
         for (let article of data) {
-            addNode(
-                div,
-                "h2",
-                '<a href="' + article.link + '">' + article.title + "</a>"
-            );
-            addNode(div, "p", article.description);
+            let a = addNode(div, "a", article.title);
+            a.href = article.link;
+            a.className = "com-x-newsFrame-title";
+            let p = addNode(div, "p", article.description);
+            p.className = "com-x-newsFrame-text";
         }
+
         div.style.overflowY = "scroll";
         div.style.overflowX = "hidden";
-        div.style.width = config.width || "100%";
-        div.style.height = config.height || "150px";
+
+        if (forceSize) {
+            div.style.width = config.width || "auto";
+            div.style.height = config.height || "150px";
+        }
         div.className = config.className;
     }
+}
+
+function addStyles() {
+    addNode(
+        document.body,
+        "style",
+        `
+      .com-x-newsFrame {
+        padding: 1rem 1rem 0 1rem;
+        background: #fff;
+      }
+      a.com-x-newsFrame-title {
+        display: block;
+        max-width: 50rem;
+        margin: 0 0 .5rem;
+        padding: 0;
+        font-size: 1.3rem;
+        line-height: 1.15;
+        letter-spacing: .02rem;
+        color: #00f;
+      }
+      .com-x-newsFrame-text {
+        max-width: 50rem;
+        margin: 1rem 0 3rem;
+        font-size: 1rem;
+        line-height: 1.2;
+        color: #000;
+      }
+      .com-x-newsFrame-headline {
+        max-width: 50rem;
+        margin: 0 0 2rem;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #000;
+      }`
+    );
 }
 
 function stripPxSuffix(val) {
@@ -41,7 +83,7 @@ fetch(newsUrl)
                 let height = config.height ? stripPxSuffix(config.height) : 250;
 
                 let div = document.createElement("div");
-                buildContent(div, data, false);
+                buildContent(div, data, false, false);
                 div.style.height = "100%";
 
                 const jsFrame = new JSFrame();
